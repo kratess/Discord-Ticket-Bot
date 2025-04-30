@@ -3,6 +3,7 @@ export default {
   channelId: "",
 
   message: {
+    color: "#097969",
     title: "🎟️ Ticket Dashboard",
     desc: "Choose a category to open your ticket",
     thumbnail: null,

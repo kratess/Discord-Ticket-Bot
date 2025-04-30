@@ -6,6 +6,7 @@ import {
   StringSelectMenuOptionBuilder,
   ActionRowBuilder,
   TextChannel,
+  ColorResolvable,
 } from "discord.js";
 import data from "../src/data"; // Import your data that contains guildId and channelId
 
@@ -50,7 +51,7 @@ export default {
 
 const getEmbedMessage = () => {
   return new EmbedBuilder()
-    .setColor("#097969")
+    .setColor(data.message.color as ColorResolvable | null)
     .setTitle(data.message.title)
     .setDescription(data.message.desc)
     .setThumbnail(data.message.thumbnail)
