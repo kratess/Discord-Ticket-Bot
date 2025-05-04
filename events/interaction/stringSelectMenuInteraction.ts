@@ -10,6 +10,7 @@ import {
   MessageFlags,
   Guild,
   GuildBasedChannel,
+  PermissionFlagsBits,
 } from "discord.js";
 import data from "../../src/data";
 import { formatMessage } from "../../src/utils";
@@ -49,10 +50,34 @@ export default {
       return;
     }
 
+    const category = await guild.channels.fetch(categoryId);
+    if (!category || category.type !== ChannelType.GuildCategory) return;
+
+    // Clone permission overwrites from the category
+    const permissionOverwrites = category.permissionOverwrites.cache.map(
+      (overwrite) => ({
+        id: overwrite.id,
+        allow: overwrite.allow.toArray(),
+        deny: overwrite.deny.toArray(),
+      })
+    );
+
     const newChannel = await guild.channels.create({
       name: newChannelName,
       type: ChannelType.GuildText,
       parent: categoryId,
+      permissionOverwrites: [
+        ...permissionOverwrites,
+        {
+          // Allow access to the specific user
+          id: interaction.user.id,
+          allow: [
+            PermissionFlagsBits.ViewChannel,
+            PermissionFlagsBits.SendMessages,
+            PermissionFlagsBits.ReadMessageHistory,
+          ],
+        },
+      ],
     });
 
     await interaction.reply({
