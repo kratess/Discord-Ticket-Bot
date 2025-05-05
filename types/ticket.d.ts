@@ -44,6 +44,7 @@ export interface TicketConfig {
   channelId: string;
   message: MessageConfig;
   tickets: TicketCategory[];
+  ticketChannelName: string;
   ticketFirstMessge: string;
   ticket_close: CloseConfig;
   transcript: TranscriptConfig;

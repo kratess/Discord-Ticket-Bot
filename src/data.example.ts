@@ -11,7 +11,7 @@ const config: TicketConfig = {
     thumbnail: null,
     image: null,
     selector: {
-      customId: "ticket",
+      customId: "ticket_open",
       placeholder: "Choose a category",
       message:
         "You opened a **${ticket}** ticket, check the channel ${channel}",
@@ -41,6 +41,7 @@ const config: TicketConfig = {
     }
   ],
 
+  ticketChannelName: "${user}",
   ticketFirstMessge:
     "${user} you opened a ${ticketType} ticket\nStaff will assist you shortly!",
 

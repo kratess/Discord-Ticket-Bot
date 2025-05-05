@@ -10,7 +10,7 @@ import {
   PermissionFlagsBits,
   StringSelectMenuInteraction,
   TextChannel,
-  User,
+  User
 } from "discord.js";
 import data from "../src/data";
 import { formatMessage } from "../src/utils";
@@ -26,7 +26,9 @@ export const openTicket = async (
   if (!ticket) return;
 
   const categoryId = ticket.categoryId;
-  const newChannelName = interaction.user.displayName;
+  const newChannelName = formatMessage(data.ticketChannelName, {
+    user: interaction.user.displayName
+  });
 
   const ticketCategoryAlreadyOpen = getChannelInCategory(
     guild,
@@ -37,9 +39,9 @@ export const openTicket = async (
     await interaction.reply({
       content: formatMessage(data.message.selector.alreadyOpenCategory, {
         ticket: ticket.name,
-        channel: `<#${ticketCategoryAlreadyOpen.id}>`,
+        channel: `<#${ticketCategoryAlreadyOpen.id}>`
       }),
-      flags: MessageFlags.Ephemeral,
+      flags: MessageFlags.Ephemeral
     });
 
     return;
@@ -53,7 +55,7 @@ export const openTicket = async (
     (overwrite) => ({
       id: overwrite.id,
       allow: overwrite.allow.toArray(),
-      deny: overwrite.deny.toArray(),
+      deny: overwrite.deny.toArray()
     })
   );
 
@@ -69,18 +71,18 @@ export const openTicket = async (
         allow: [
           PermissionFlagsBits.ViewChannel,
           PermissionFlagsBits.SendMessages,
-          PermissionFlagsBits.ReadMessageHistory,
-        ],
-      },
-    ],
+          PermissionFlagsBits.ReadMessageHistory
+        ]
+      }
+    ]
   });
 
   await interaction.reply({
     content: formatMessage(data.message.selector.message, {
       ticket: ticket.name,
-      channel: `<#${newChannel.id}>`,
+      channel: `<#${newChannel.id}>`
     }),
-    flags: MessageFlags.Ephemeral,
+    flags: MessageFlags.Ephemeral
   });
 
   await sendFirstMessage(newChannel, interaction.user, ticket.name);
@@ -112,11 +114,11 @@ async function sendFirstMessage(
 
   const content = formatMessage(data.ticketFirstMessge, {
     user: `<@${user.id}>`,
-    ticketType: ticketType,
+    ticketType: ticketType
   });
 
   await channel.send({
     content: content,
-    components: [row],
+    components: [row]
   });
 }
