@@ -1,14 +1,14 @@
 {
   "name": "botticket",
   "version": "1.1.0",
-  "description": "",
+  "description": "Ticket bot for discord",
   "main": "./src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node ./src/index.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "kratess <kratess.dev>",
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.19.2"
