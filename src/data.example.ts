@@ -1,4 +1,6 @@
-export default {
+import { TicketConfig } from "../types/ticket";
+
+const config: TicketConfig = {
   guildId: "",
   channelId: "",
 
@@ -11,41 +13,49 @@ export default {
     selector: {
       customId: "ticket",
       placeholder: "Choose a category",
-      message: "You opened a **${ticket}** ticket, check the channel ${channel}",
-      alreadyOpenCategory: "You already have an open **${ticket}** ticket. Check ${channel}"
+      message:
+        "You opened a **${ticket}** ticket, check the channel ${channel}",
+      alreadyOpenCategory:
+        "You already have an open **${ticket}** ticket. Check ${channel}"
     },
+    autoFields: true,
+    customFields: null,
+    selectorType: "list"
   },
 
   tickets: [
     {
       name: "🛠️ Support",
       desc: "Request support for general issues",
-      categoryId: "",
+      categoryId: ""
     },
     {
       name: "⛔ Ban",
       desc: "Open a ticket if you believe your ban is unfair",
-      categoryId: "",
+      categoryId: ""
     },
     {
       name: "💸 Donations",
       desc: "Open a ticket to make a donation",
-      categoryId: "",
-    },
+      categoryId: ""
+    }
   ],
 
-  ticketFirstMessge: "${user} you opened a ${ticketType} ticket\nStaff will assist you shortly!",
+  ticketFirstMessge:
+    "${user} you opened a ${ticketType} ticket\nStaff will assist you shortly!",
 
   ticket_close: {
     customId: "ticket_close",
     label: "Close",
     delay: 5000,
-    message: "The ticket will be closed in 5 seconds...",
+    message: "The ticket will be closed in 5 seconds..."
   },
 
   transcript: {
     channelId: "",
     limit: 100, // limit of messages
-    message: "📄 Transcript of the **#${ticket}** ticket closed by ${user}",
-  },
+    message: "📄 Transcript of the **#${ticket}** ticket closed by ${user}"
+  }
 };
+
+export default config;

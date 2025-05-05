@@ -9,33 +9,46 @@ import {
 import data from "../../src/data";
 import { AttachmentBuilder } from "discord.js";
 import { formatMessage } from "../../src/utils";
+import { openTicket } from "../../services/ticket";
 
 export default {
   name: Events.InteractionCreate,
   async execute(interaction: ButtonInteraction) {
     if (!interaction.isButton()) return;
-    if (interaction.customId !== data.ticket_close.customId) return;
 
-    if (data.ticket_close.delay > 0) {
-      await interaction.reply({
-        content: data.ticket_close.message,
-        flags: MessageFlags.Ephemeral,
-      });
+    // close ticket
+    if (interaction.customId === data.ticket_close.customId) {
+      if (data.ticket_close.delay > 0) {
+        await interaction.reply({
+          content: data.ticket_close.message,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      setTimeout(async () => {
+        const ticketChannel = interaction.channel;
+        if (ticketChannel && ticketChannel instanceof TextChannel) {
+          const channel = await interaction.client.channels.fetch(
+            data.transcript.channelId
+          );
+          if (channel && channel instanceof TextChannel) {
+            await createTranscript(ticketChannel, channel, interaction.user);
+          }
+
+          await ticketChannel.delete();
+        }
+      }, data.ticket_close.delay);
     }
 
-    setTimeout(async () => {
-      const ticketChannel = interaction.channel;
-      if (ticketChannel && ticketChannel instanceof TextChannel) {
-        const channel = await interaction.client.channels.fetch(
-          data.transcript.channelId
-        );
-        if (channel && channel instanceof TextChannel) {
-          await createTranscript(ticketChannel, channel, interaction.user);
-        }
+    // open ticket with button
+    if (interaction.customId.startsWith(data.message.selector.customId)) {
+      const ticketName = interaction.customId.replace(
+        data.message.selector.customId + "_",
+        ""
+      );
 
-        await ticketChannel.delete();
-      }
-    }, data.ticket_close.delay);
+      openTicket(interaction, ticketName)
+    }
   },
 };
 

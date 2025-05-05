@@ -1,3 +1,5 @@
+/// <reference path="../types/index.d.ts" />
+
 import "dotenv/config";
 
 import assert from "assert";

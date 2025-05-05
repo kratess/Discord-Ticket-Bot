@@ -6,7 +6,8 @@ import {
   StringSelectMenuOptionBuilder,
   ActionRowBuilder,
   TextChannel,
-  ColorResolvable,
+  ButtonBuilder,
+  ButtonStyle
 } from "discord.js";
 import data from "../src/data"; // Import your data that contains guildId and channelId
 
@@ -30,55 +31,110 @@ export default {
       }
 
       const embed = getEmbedMessage();
-      const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-        getSelector()
-      );
+      let components: ActionRowBuilder<any>[] = [];
+
+      switch (data.message.selectorType) {
+        case "buttons":
+          components = getSelectorButtons(); // returns an array
+          break;
+        case "list":
+        default:
+          components = [getSelectorList()]; // wrap single row in array
+          break;
+      }
 
       const lastMessage = (await channel.messages.fetch({ limit: 1 })).first();
       // Check if last message in channel is the bot's message
       if (lastMessage && lastMessage.author.id === client.user.id) {
         // If last message is from bot then edit it
-        await lastMessage.edit({ embeds: [embed], components: [row.toJSON()] });
+        await lastMessage.edit({
+          embeds: [embed],
+          components
+        });
       } else {
         // Else send new message
-        await channel.send({ embeds: [embed], components: [row] });
+        await channel.send({
+          embeds: [embed],
+          components
+        });
       }
-    } catch (e) {
-      console.error("Guild not found!");
+    } catch (error) {
+      console.error("Guild not found!", error);
     }
-  },
+  }
 };
 
 const getEmbedMessage = () => {
-  return new EmbedBuilder()
-    .setColor(data.message.color as ColorResolvable | null)
+  const embed = new EmbedBuilder()
+    .setColor(data.message.color)
     .setTitle(data.message.title)
     .setDescription(data.message.desc)
     .setThumbnail(data.message.thumbnail)
-    .addFields(
-      ...data.tickets.map((ticket) => ({
-        name: ticket.name,
-        value: ticket.desc,
-      }))
-    )
     .setImage(data.message.image)
     .setFooter({
       text: "Developed by kratess.dev", // Keep this to give credits
-      iconURL: "https://kratess.dev/favicon.png", // Keep this to give credits
+      iconURL: "https://kratess.dev/favicon.png" // Keep this to give credits
     })
     .setTimestamp();
+
+  if (data.message.autoFields) {
+    embed.addFields(
+      ...data.tickets.map((ticket) => ({
+        name: ticket.name,
+        value: ticket.desc || ""
+      }))
+    );
+  } else if (data.message.customFields) {
+    embed.addFields(data.message.customFields);
+  }
+
+  return embed;
 };
 
-const getSelector = () => {
-  return new StringSelectMenuBuilder()
+const getSelectorList = () => {
+  const selector = new StringSelectMenuBuilder()
     .setCustomId(data.message.selector.customId)
     .setPlaceholder(data.message.selector.placeholder)
     .addOptions(
-      ...data.tickets.map((ticket) =>
-        new StringSelectMenuOptionBuilder()
+      ...data.tickets.map((ticket) => {
+        const option = new StringSelectMenuOptionBuilder()
           .setLabel(ticket.name)
-          .setDescription(ticket.desc)
-          .setValue(ticket.name)
-      )
+          .setValue(ticket.name);
+
+        if (ticket.desc) {
+          option.setDescription(ticket.desc); // Only set description if it is defined
+        }
+
+        return option;
+      })
     );
+
+  return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+    selector
+  );
+};
+
+const getSelectorButtons = () => {
+  const rows: ActionRowBuilder<ButtonBuilder>[] = [];
+  let currentRow = new ActionRowBuilder<ButtonBuilder>();
+
+  data.tickets.forEach((ticket, index) => {
+    const button = new ButtonBuilder()
+      .setCustomId(`${data.message.selector.customId}_${ticket.name}`)
+      .setLabel(ticket.name)
+      .setStyle(ticket.buttonColor || ButtonStyle.Secondary);
+
+    currentRow.addComponents(button);
+
+    // Add the row if it's full or it's the last button
+    if (
+      currentRow.components.length === 5 ||
+      index === data.tickets.length - 1
+    ) {
+      rows.push(currentRow);
+      currentRow = new ActionRowBuilder<ButtonBuilder>();
+    }
+  });
+
+  return rows;
 };
