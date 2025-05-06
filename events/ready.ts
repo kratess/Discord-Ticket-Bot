@@ -124,6 +124,10 @@ const getSelectorButtons = () => {
       .setLabel(ticket.name)
       .setStyle(ticket.buttonColor || ButtonStyle.Secondary);
 
+    if (ticket.emoji) {
+      button.setEmoji(ticket.emoji);
+    }
+
     currentRow.addComponents(button);
 
     // Add the row if it's full or it's the last button

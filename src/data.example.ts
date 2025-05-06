@@ -19,7 +19,6 @@ const config: TicketConfig = {
         "You already have an open **${ticket}** ticket. Check ${channel}"
     },
     autoFields: true,
-    customFields: null,
     selectorType: "list"
   },
 

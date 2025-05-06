@@ -3,6 +3,7 @@ import { APIEmbedField, ButtonStyle, ColorResolvable } from "discord.js";
 export interface TicketCategory {
   name: string;
   desc?: string;
+  emoji?: string;
   categoryId: string;
   buttonColor?: ButtonStyle;
 }
@@ -22,7 +23,7 @@ export interface MessageConfig {
   image: string | null;
   selector: SelectorConfig;
   autoFields: boolean;
-  customFields?: APIEmbedField[] | null;
+  customFields?: APIEmbedField[];
   selectorType: "list" | "buttons";
 }
 
