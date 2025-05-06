@@ -51,13 +51,22 @@ export const openTicket = async (
   if (!category || category.type !== ChannelType.GuildCategory) return;
 
   // Clone permission overwrites from the category
-  const permissionOverwrites = category.permissionOverwrites.cache.map(
-    (overwrite) => ({
+  const botMember = await guild.members.fetchMe();
+
+  const permissionOverwrites = category.permissionOverwrites.cache
+    .filter((overwrite) => {
+      // Filter permissions over bot
+      const targetRole = guild.roles.cache.get(overwrite.id);
+      if (targetRole) {
+        return botMember.roles.highest.comparePositionTo(targetRole) >= 0;
+      }
+      return true;
+    })
+    .map((overwrite) => ({
       id: overwrite.id,
       allow: overwrite.allow.toArray(),
       deny: overwrite.deny.toArray()
-    })
-  );
+    }));
 
   const newChannel = await guild.channels.create({
     name: newChannelName,
