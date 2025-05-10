@@ -4,7 +4,7 @@ import {
   Message,
   MessageFlags,
   TextChannel,
-  User,
+  User
 } from "discord.js";
 import data from "../../src/data";
 import { AttachmentBuilder } from "discord.js";
@@ -21,7 +21,7 @@ export default {
       if (data.ticket_close.delay > 0) {
         await interaction.reply({
           content: data.ticket_close.message,
-          flags: MessageFlags.Ephemeral,
+          flags: MessageFlags.Ephemeral
         });
       }
 
@@ -38,18 +38,18 @@ export default {
           await ticketChannel.delete();
         }
       }, data.ticket_close.delay);
-    }
-
-    // open ticket with button
-    if (interaction.customId.startsWith(data.message.selector.customId)) {
+    } else if (
+      interaction.customId.startsWith(data.message.selector.customId)
+    ) {
+      // open ticket with button
       const ticketName = interaction.customId.replace(
         data.message.selector.customId + "_",
         ""
       );
 
-      openTicket(interaction, ticketName)
+      openTicket(interaction, ticketName);
     }
-  },
+  }
 };
 
 async function createTranscript(
@@ -59,7 +59,7 @@ async function createTranscript(
 ) {
   // Fetch messages from the source channel (you can increase the limit as needed)
   const messages = await sourceChannel.messages.fetch({
-    limit: data.transcript.limit,
+    limit: data.transcript.limit
   });
 
   // Sort messages from oldest to newest
@@ -95,12 +95,12 @@ async function createTranscript(
   await targetChannel.send({
     content: formatMessage(data.transcript.message, {
       ticket: sourceChannel.name,
-      user: `<@${user.id}>`,
+      user: `<@${user.id}>`
     }),
     files: [
       new AttachmentBuilder(Buffer.from(transcript), {
-        name: "transcript.txt",
-      }),
-    ],
+        name: "transcript.txt"
+      })
+    ]
   });
 }
