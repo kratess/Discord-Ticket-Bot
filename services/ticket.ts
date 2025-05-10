@@ -4,6 +4,7 @@ import {
   ButtonInteraction,
   ButtonStyle,
   ChannelType,
+  EmbedBuilder,
   Guild,
   GuildBasedChannel,
   MessageFlags,
@@ -121,13 +122,27 @@ async function sendFirstMessage(
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(commonButton);
 
-  const content = formatMessage(data.ticketFirstMessge, {
+  const formattedMessage = formatMessage(data.ticketFirstMessge, {
     user: `<@${user.id}>`,
     ticketType: ticketType
   });
 
   await channel.send({
-    content: content,
+    embeds: [getEmbedMessage(formattedMessage)],
     components: [row]
   });
 }
+
+const getEmbedMessage = (desc: string) => {
+  const embed = new EmbedBuilder()
+    .setColor(data.message.color)
+    .setTitle(data.message.title)
+    .setDescription(desc)
+    .setFooter({
+      text: "Developed by kratess.dev", // Keep this to give credits
+      iconURL: "https://kratess.dev/favicon.png" // Keep this to give credits
+    })
+    .setTimestamp();
+
+  return embed;
+};
