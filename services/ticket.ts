@@ -4,10 +4,8 @@ import {
   ButtonInteraction,
   ButtonStyle,
   ChannelType,
-  EmbedBuilder,
   Guild,
   GuildBasedChannel,
-  MessageFlags,
   PermissionFlagsBits,
   StringSelectMenuInteraction,
   TextChannel,
@@ -20,6 +18,8 @@ export const openTicket = async (
   interaction: ButtonInteraction | StringSelectMenuInteraction,
   ticketName: string
 ) => {
+  await interaction.deferReply({ ephemeral: true });
+
   const guild = interaction.guild;
   if (!guild) return;
 
@@ -37,12 +37,11 @@ export const openTicket = async (
     newChannelName
   );
   if (ticketCategoryAlreadyOpen) {
-    await interaction.reply({
+    await interaction.editReply({
       content: formatMessage(data.message.selector.alreadyOpenCategory, {
         ticket: ticket.name,
         channel: `<#${ticketCategoryAlreadyOpen.id}>`
-      }),
-      flags: MessageFlags.Ephemeral
+      })
     });
 
     return;
@@ -87,12 +86,11 @@ export const openTicket = async (
     ]
   });
 
-  await interaction.reply({
+  await interaction.editReply({
     content: formatMessage(data.message.selector.message, {
       ticket: ticket.name,
       channel: `<#${newChannel.id}>`
-    }),
-    flags: MessageFlags.Ephemeral
+    })
   });
 
   await sendFirstMessage(newChannel, interaction.user, ticket.name);
@@ -122,27 +120,13 @@ async function sendFirstMessage(
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(commonButton);
 
-  const formattedMessage = formatMessage(data.ticketFirstMessge, {
+  const content = formatMessage(data.ticketFirstMessge, {
     user: `<@${user.id}>`,
     ticketType: ticketType
   });
 
   await channel.send({
-    embeds: [getEmbedMessage(formattedMessage)],
+    content: content,
     components: [row]
   });
 }
-
-const getEmbedMessage = (desc: string) => {
-  const embed = new EmbedBuilder()
-    .setColor(data.message.color)
-    .setTitle(data.message.title)
-    .setDescription(desc)
-    .setFooter({
-      text: "Developed by kratess.dev", // Keep this to give credits
-      iconURL: "https://kratess.dev/favicon.png" // Keep this to give credits
-    })
-    .setTimestamp();
-
-  return embed;
-};
