@@ -40,9 +40,12 @@ const config: TicketConfig = {
     }
   ],
 
-  ticketChannelName: "${user}",
-  ticketFirstMessge:
-    "${user} you opened a ${ticketType} ticket\nStaff will assist you shortly!",
+  ticketChannelName: "ticket-${user}",
+  ticketFirstMessage: {
+    content: null,
+    embed:
+      "${user} you opened a ${ticketType} ticket\n\nStaff will assist you shortly!"
+  },
 
   ticket_close: {
     customId: "ticket_close",

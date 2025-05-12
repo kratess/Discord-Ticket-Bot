@@ -10,6 +10,7 @@ import {
   ButtonStyle
 } from "discord.js";
 import data from "../src/data"; // Import your data that contains guildId and channelId
+import { log } from "../src/utils";
 
 export default {
   name: Events.ClientReady,
@@ -17,7 +18,7 @@ export default {
   async execute(client: Client) {
     if (!client.user) return;
 
-    console.log(
+    log(
       `Ready! Logged in as ${client.user.tag}. Bot created by kratess <https://kratess.dev/>`
     ); // Keep this to give credits
 

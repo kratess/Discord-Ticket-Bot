@@ -1,18 +1,23 @@
 import {
   ActionRowBuilder,
+  AttachmentBuilder,
   ButtonBuilder,
   ButtonInteraction,
   ButtonStyle,
   ChannelType,
+  EmbedBuilder,
   Guild,
   GuildBasedChannel,
+  Message,
   PermissionFlagsBits,
   StringSelectMenuInteraction,
   TextChannel,
   User
 } from "discord.js";
 import data from "../src/data";
-import { formatMessage } from "../src/utils";
+import { formatMessage, log } from "../src/utils";
+import path from "path";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 
 export const openTicket = async (
   interaction: ButtonInteraction | StringSelectMenuInteraction,
@@ -94,6 +99,8 @@ export const openTicket = async (
   });
 
   await sendFirstMessage(newChannel, interaction.user, ticket.name);
+
+  log(`Open ticket ${newChannelName}`);
 };
 
 function getChannelInCategory(
@@ -120,13 +127,93 @@ async function sendFirstMessage(
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(commonButton);
 
-  const content = formatMessage(data.ticketFirstMessge, {
-    user: `<@${user.id}>`,
-    ticketType: ticketType
+  if (data.ticketFirstMessage?.embed) {
+    const embed = getEmbedMessage(
+      formatMessage(data.ticketFirstMessage?.embed, {
+        user: `<@${user.id}>`,
+        ticketType: ticketType
+      })
+    );
+
+    await channel.send({
+      content: data.ticketFirstMessage?.content || undefined,
+      embeds: [embed],
+      components: [row]
+    });
+  } else {
+    await channel.send({
+      content: data.ticketFirstMessage?.content || undefined,
+      components: [row]
+    });
+  }
+}
+
+const getEmbedMessage = (msg: string) => {
+  const embed = new EmbedBuilder()
+    .setColor(data.message.color)
+    .setTitle(data.message.title)
+    .setDescription(msg)
+    .setFooter({
+      text: "Developed by kratess.dev", // Keep this to give credits
+      iconURL: "https://kratess.dev/favicon.png" // Keep this to give credits
+    })
+    .setTimestamp();
+
+  return embed;
+};
+
+export async function createTranscript(
+  sourceChannel: TextChannel,
+  targetChannel: TextChannel,
+  user: User
+) {
+  const messages = await sourceChannel.messages.fetch({
+    limit: data.transcript.limit
   });
 
-  await channel.send({
-    content: content,
-    components: [row]
+  const sortedMessages = messages.sort(
+    (a, b) => a.createdTimestamp - b.createdTimestamp
+  );
+
+  let transcript = "";
+  sortedMessages.forEach((message: Message) => {
+    let content = message.content;
+
+    if (message.embeds.length > 0) {
+      content += `\n[Embed Content: ${message.embeds.length} embed(s)]`;
+    }
+
+    if (message.attachments.size > 0) {
+      content += `\n[Attachment(s): ${message.attachments.size} file(s)]`;
+    }
+
+    transcript += `${message.author.displayName}: ${content}\n`;
+  });
+
+  if (transcript.length > 2000) {
+    transcript = transcript.substring(0, 2000) + "... (transcript too long)";
+  }
+
+  // Save the transcript locally
+  const dir = path.resolve("transcripts");
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+
+  const date = new Date().toISOString().split("T")[0];
+  const filePath = path.join(dir, `${date}_${sourceChannel.id}_transcript.txt`);
+  writeFileSync(filePath, transcript, "utf-8");
+
+  // Send the transcript file to the target channel
+  await targetChannel.send({
+    content: formatMessage(data.transcript.message, {
+      ticket: sourceChannel.name,
+      user: `<@${user.id}>`
+    }),
+    files: [
+      new AttachmentBuilder(Buffer.from(transcript), {
+        name: "transcript.txt"
+      })
+    ]
   });
 }

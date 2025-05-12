@@ -40,13 +40,18 @@ export interface TranscriptConfig {
   message: string;
 }
 
+interface TicketFirstMessage {
+  content?: string | null;
+  embed?: string | null;
+}
+
 export interface TicketConfig {
   guildId: string;
   channelId: string;
   message: MessageConfig;
   tickets: TicketCategory[];
   ticketChannelName: string;
-  ticketFirstMessge: string;
+  ticketFirstMessage?: TicketFirstMessage | null;
   ticket_close: CloseConfig;
   transcript: TranscriptConfig;
 }
